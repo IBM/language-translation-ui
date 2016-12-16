@@ -40,8 +40,8 @@ exports.handleMicrophone = function(token, model, mic, callback) {
   });
 
   var keywords = display.getKeywordsToSearch();
-  var keywords_threshold = keywords.length == 0 ? null : 0.01;
-
+  // var keywords_threshold = keywords.length == 0 ? null : 0.01;
+  // var keywords_threshold = 0.0
   var options = {};
   options.token = token;
   options.message = {
@@ -54,7 +54,7 @@ exports.handleMicrophone = function(token, model, mic, callback) {
     'max_alternatives': 3,
     'inactivity_timeout': 600,
     'word_alternatives_threshold': 0.001,
-    'keywords_threshold': keywords_threshold,
+    // 'keywords_threshold': keywords_threshold,
     'keywords': keywords,
     'smart_formatting': true
   };

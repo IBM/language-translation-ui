@@ -22,11 +22,11 @@ var express = require('express'),
 
 module.exports = function(app) {
   app.set('view engine', 'ejs');
-  app.enable('trust proxy');
+  // app.enable('trust proxy');
 
   // Only loaded when SECURE_EXPRESS is `true`
-  if (process.env.SECURE_EXPRESS)
-    require('./security')(app);
+  // if (process.env.SECURE_EXPRESS)
+  //   require('./security')(app);
 
   // Configure Express
   app.use(bodyParser.urlencoded({extended: true, limit: '1mb'}));

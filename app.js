@@ -29,6 +29,12 @@ require('dotenv').load({silent: true});
 // Bootstrap application settings
 require('./config/express')(app);
 
+// app.use(function(req, res, next) {
+//     res.header("Access-Control-Allow-Origin", "*");
+//     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+//     next();
+// });
+
 // automatically compile and serve the front-end js
 app.get('/js/index.js', expressBrowserify('src/index.js', {
   watch: process.env.NODE_ENV !== 'production'

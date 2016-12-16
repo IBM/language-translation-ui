@@ -27,10 +27,10 @@ module.exports = function(app) {
   app.enable('trust proxy');
 
   // 1. redirects http to https
-  app.use(secure());
+  // app.use(secure());
 
   // 2. helmet with defaults
-  app.use(helmet());
+  // app.use(helmet());
 
   // 3. setup cookies
   var secret = Math.random().toString(36).substring(7);
@@ -38,11 +38,11 @@ module.exports = function(app) {
 
   // 4. csrf
   // part 1: generate a csrf token for homepage views
-  var csrfProtection = csrf({cookie: true});
-  app.get('/', csrfProtection, function(req, res, next) {
-    req._csrfToken = req.csrfToken();
-    next();
-  });
+  // var csrfProtection = csrf({cookie: true});
+  // app.get('/', csrfProtection, function(req, res, next) {
+  //   req._csrfToken = req.csrfToken();
+  //   next();
+  // });
   // part 2: require token on /api/* requests
   app.use('/api/', csrfProtection);
 

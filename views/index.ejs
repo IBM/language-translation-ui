@@ -9,9 +9,47 @@
     <link href="css/watson-bootstrap-style.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
     <link rel="shortcut icon" href="images/favicon.ico" />
+    <script src="scripts/mqttws31.js" type="text/javascript"></script>
+    <script src="scripts/mqttConnect.js" type="text/javascript"></script>
+    <script defer src="scripts/watsonServices.js" type="text/javascript"></script>
   </head>
   <body>
     <!-- top nav section -->
+
+    <script defer type="text/javascript">
+    var watson_text_to_speech_token = "<%= process.env.WATSON_TEXT_TO_SPEECH_TOKEN %>"
+    var successFunc = function() {
+      console.log("subscribing")
+    }
+    window.onload = function () {
+            console.log("connecting");
+            // clients['client1'].connect(Object.assign(options, {onSuccess: function() {document.getElementById("client1_div").style.border = "thick solid #0000FF"; } }));
+            clients['client1'].connect(options);
+            clients['tokens'].connect(options);
+            // setTimeout is used here because client.connect() does not block
+            window.setTimeout(function(){
+                console.log("subscribing to languagetest/translated/" + document.querySelector('#client1_language').value);
+                // mqtt_client.subscribe('languagetest/+/clientout');
+                clients['client1'].subscribe('languagetest/translated/' + document.querySelector('#client1_language').value);
+                // console.log("subscribed");
+
+                clients['tokens'].subscribe('tokens/tts/out');
+
+                // client.subscribe('languagetest/' + document.querySelector('#language').value, {qos: 2}) ; console.log('sub');
+                // initWS()
+                publish("request", 'tokens/tts/req', 2, 'tokens'); // TODO, should request a new token every hour
+            } , 2500);
+            // client is streaming to websocket by default
+
+            recordButton.onclick = function () {
+              if (recordButton.getAttribute('style'))
+                {
+                  console.log("message recorded")
+                  publish($('#resultsText').val(),'languagetest/clientout/text/' + document.querySelector('#client1_language').value + '/' + clientId ,2, "client1")
+                }
+            };
+    }
+    </script>
     <div class="navbar-wrapper">
 
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -33,52 +71,6 @@
 
     </div><!-- .navbar-wrapper -->
 
-    <!-- Service Description Bar -->
-
-    <div class="header">
-      <div class="container">
-        <div class="col-lg-2 col-md-2 hidden-xs hidden-sm">
-          <img src="images/stt.svg" class="service-icon">
-        </div><!-- .col-lg-2 -->
-
-        <div class="col-lg-10 col-md-10 col-xs-12">
-          <h1>Speech to Text</h1>
-          <p>The IBM Watson Speech to Text service uses speech recognition capabilities to convert Arabic, English, Spanish, French, Brazilian Portuguese, Japanese, and Mandarin speech into text.</p>
-          <p><img src="images/link.svg" class="glyph"><strong>Resources:</strong></br>
-          <div class="resources">
-            <a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/speech-to-text/api">API Reference</a>
-            <a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/doc/speech-to-text/">Documentation</a>
-            <a href="https://github.com/watson-developer-cloud/speech-to-text-nodejs">Fork on Github</a>
-            <a href="https://bluemix.net/deploy?repository=https://github.com/watson-developer-cloud/speech-to-text-nodejs">Fork and Deploy on Github</a>
-          </div><!-- .resources -->
-          </p>
-        </div><!-- .col-lg-10 -->
-      </div><!-- .container -->
-    </div><!-- .header -->
-    <!-- Step 1 Section-->
-    <div class="container">
-      <!-- Step 3 Section-->
-      <!-- First column of inputs -->
-      <div class="row">
-        <div class="col-lg-12 col-md-12 col-sm-12">
-          <h2>Transcribe Audio</h2>
-          <div class="col-lg-8 col-md-12 col-sm-12">
-            <p class="help-block" style="padding-right: 3em;">You may choose to spot your keywords by entering them (separated by commas) in the text box. Use your microphone (compatible only with <a href="https://www.google.com/intl/en/chrome/browser/desktop/">Google Chrome</a> and <a href="https://www.mozilla.org/en-US/firefox/new/">Mozilla Firefox</a>). Upload pre-recorded audio (WAV for uncompressed audio, FLAC or OPUS) file formats. Drag and drop recorded audio onto the page, or use the audio samples provided. The returned result includes the recognized text, word alternatives (aka confusion networks), and spotted keywords.</p>
-          </div><!-- .col-lg-8 -->
-          <div class="col-lg-4 col-md-12 col-sm-12">
-            <div class="opt-box">
-              <h6><strong>Would you like to help make this service better?</strong><br><br>
-                <div class="form-group opt-box-input">
-                  <div id="sessionPermissionsRadioGroup">
-                    <input type="radio" name="sessionpermissions" value="true" checked="checked">Allow Watson to learn from this session<br>
-                    <input type="radio" name="sessionpermissions" value="false">Opt out
-                  </div>
-              </div></h6>
-            </div>
-          </div>
-
-        </div><!-- .col-lg-12 -->
-
         <div class="row">
           <div class="col-lg-4 col-md-6 col-sm-12">
             <div class="dropdown">
@@ -90,7 +82,7 @@
               </ul>
             </div>
           </div><!-- .col-lg-6 -->
-          <div style="float:left;margin-left:130px;">
+          <div style="float:left;margin-left:130px;display: none;" >
             <input type="text" id="tb_keywords" value="Type comma separated keywords here (OPTIONAL)." style="font-style:italic;color:#A0A0A0;" autocomplete="off"/>
             <!--
               <div id="btnLoadKWS">
@@ -103,9 +95,9 @@
                     <a class="pull-right" href="#" id="errorWrongKeywordsFiletypeClose">&times;</a>
                   </div>
                 </span>
-              </div>	
+              </div>
             -->
-          </div> 
+          </div>
 
         </div><!-- row -->
 
@@ -119,6 +111,12 @@
           </div>
         </div><!-- row -->
 
+        <audio id="playResults" display="none"; class="audio"  controls >
+             <source id="wavSource" type="audio/wav"></source>
+        </audio>
+        <!-- <button>
+          foo
+        </button> -->
 
         <div class="row">
           <nav class="navbar navbar-inverse">
@@ -196,11 +194,11 @@
               <div id="keywords">
                 <ul style="margin-top:10px; margin-left:-40px;"></ul>
               </div>
-            </div>  
+            </div>
           </div><!-- /.well -->
         </div><!-- /.tabpanel -->
 
-        <div class="col-lg-12 col-md-12 col-sm-12">
+        <div class="col-lg-12 col-md-12 col-sm-12" style="display: none;">
           <div style="margin-top:2em;">
             <span style="font-size:1.563em;font-weight:400;color:#323232;-webkit-user-select:none;-moz-user-select:none;">
               Word Alternatives
@@ -255,5 +253,129 @@
       </script>
       <% } %>
 
+      <button onclick="addClient()">Add Client</button>
+      <!-- <input type="submit" value="Submit"> -->
+      <div id="clientContainer" class="textAreaColumn">
+        <div id="client1_div">
+        <textarea readonly id="client1_messages" style="border:solid 1px black;" dir="auto"></textarea>
+        <form><input type="text" id="client1_message"></form>
+        <button onclick="console.log(document.querySelector('#client1_message').value) ;  publish(document.querySelector('#client1_message').value,'languagetest/clientout/text/' + document.querySelector('#client1_language').value + '/' + clients['client1']._getClientId() ,2 , 'client1');">Submit</button>
+        <select id="client1_language" selected="english" onchange="refreshConnection('client1', oldvalue)" onfocus="this.oldvalue = this.value;">
+          <option value="en">English</option>
+          <option value="fr">French</option>
+          <option value="es">Spanish</option>
+          <option value="ar">Arabic</option>
+          <option value="pt">Portuguese</option>
+
+          <!-- <option value="jp">Japanese</option> -->
+          <!-- <option value="de">German</option> -->
+        </select>
+        <img id="client1_audio" class="audioToggle audioEnabled" onclick="toggleAudio('client1')" width="20px" height="20px" src="data:image/png;base64,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"></src>
+        </div>
+      </div>
+      <script>
+
+        // all audio icons will have an identical class, unique id
+        // clientx_audio
+        // all audio icons should be off by default
+        // when one is "on", and clicked, all audio icons should go off, and call disable audio method for associated client
+        // (default) when one is "off", and clicked, all other audio icons should go off, clicked icon should go on, and call enable audio method for associated client
+        // toggleAudio(client)
+
+        // click icon
+        // if icon muted
+        //
+
+        // enable/disable audio methods should just override/monkey patch the onMessageArrived function to call the initWS method
+
+
+        // turn on using classes?
+        // initially should be set to class audioOff, and have an id (client + "_audio")
+        // onClick
+        // select all "audioOn"
+
+
+        // onClick ;
+          // toggle icon
+          // toggle websocket audio
+          // turn off all other audio
+
+        var toggleAudio = function(client) {
+            // var audioElements = document.getElementsByClassName('audioToggle') ;
+            var audioOff = "data:image/png;base64,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"
+            var audioOn = "data:image/png;base64,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"
+            var audioElements = document.getElementsByClassName('audioEnabled') ;
+            var selectedElement = document.getElementById(client + "_audio") ;
+
+            // Array.prototype.forEach.call(audioElements, function(e) {
+            //   // console.log(e)
+            //   // console.log(e.id)
+            //   e.classList.remove("audioEnabled")
+            //   e.src = audioOff ;
+            // });
+
+            // if ( ! selectedElement.classList.contains("audioEnabled")) {
+            //     console.log("enable audio")
+            //     selectedElement.classList.add('audioEnabled');
+            //     selectedElement.src = audioOn ;
+            //     console.log(clients[client].onMessageArrived)
+            // }
+
+            if (selectedElement.classList.contains("audioEnabled")) {
+              console.log("disabling audio")
+              selectedElement.classList.remove("audioEnabled")
+              selectedElement.src = audioOff ;
+              clients[client].onMessageArrived = function (message) {
+                //text only
+                document.getElementById(client + "_messages").value += message.payloadString + '\n'
+              }
+            } else {
+              console.log("enable audio")
+              console.log(selectedElement.classList.contains("audioEnabled"))
+              selectedElement.classList.add('audioEnabled');
+              selectedElement.src = audioOn ;
+
+              clients[client].onMessageArrived = function (message) {
+                //audio and text
+                document.getElementById(client + "_messages").value += message.payloadString + '\n'
+                // var messageObj = `"{\"text\": \"${message.payloadString.split(':')[1]}\", \"accept\": \"audio/wav\"}"`;
+                messageObj = JSON.stringify({"text": `"${message.payloadString.split(':')[1]}"`, "accept": "audio/wav"});
+                // this should be done for client that
+                var MyBlobBuilder = function() {
+                  this.parts = [];
+                }
+
+                MyBlobBuilder.prototype.append = function(part) {
+                  this.parts.push(part);
+                  this.blob = undefined; // Invalidate the blob
+                };
+
+                MyBlobBuilder.prototype.getBlob = function() {
+                  if (!this.blob) {
+                    this.blob = new Blob(this.parts, { type: "audio/wav" });
+                  }
+                  return this.blob;
+                };
+                myBlobBuilder = new MyBlobBuilder();
+                initWs(client)
+                // var promise = new Promise(function(resolve, reject) {
+                //   // do a thing, possibly async, then…
+              };
+            }
+
+            // for (c in clients) {
+            //   console.log(c);
+            //   console.log(clients[c].onMessageArrived)
+            //   // clients[c].onMessageArrived = function (message) {
+            //   //   //Do something with the push message you received
+            //   //   document.getElementById(client + "_messages").value += message.payloadString + '\n'
+            //   // }
+            // }
+
+          // selectedElement.src = "data:image/png;base64,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"
+        }
+      </script>
+      <!-- <div id="messages"></div> -->
   </body>
+
 </html>
