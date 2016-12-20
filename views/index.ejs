@@ -30,9 +30,25 @@
             window.setTimeout(function(){
                 console.log("subscribing to languagetest/translated/" + document.querySelector('#client1_language').value);
                 // mqtt_client.subscribe('languagetest/+/clientout');
-                clients['client1'].subscribe('languagetest/translated/' + document.querySelector('#client1_language').value);
-                // console.log("subscribed");
-
+                var local_channel = 'languagetest/translated/' + document.querySelector('#client1_language').value
+                // var watson_channel = function(event){return 'iot-2/type/MQTTDevice/id/965d11de/evt/ '+  event + '/fmt/json'}
+                var watson_channel = 'iot-2/type/MQTTDevice/id/965d11de/evt/'+  "msgin" + '/fmt/json'
+                clients['client1'].subscribe( watson_channel,
+                  {
+                    onSuccess: function () {
+                        console.log('subscribed to ' + watson_channel);
+                        // subscribe to initial client
+                       //  clientName = 'client1'
+                       //  clients[clientName].subscribe('languagetest/translated/' + document.querySelector(`#${clientName}_language`).value);
+                        // TODO, create div classes for
+                        // document.getElementById('').style.backgroundColor = 'green';
+                       //  console.log('subscribing to ' + 'languagetest/translated/' + document.querySelector(`#${clientName}_language`).value)
+                    },
+                    onFailure: function (message) {
+                        console.log("Connection failed: " + message.errorMessage);
+                    }
+                  }
+                );
                 clients['tokens'].subscribe('tokens/tts/out');
 
                 // client.subscribe('languagetest/' + document.querySelector('#language').value, {qos: 2}) ; console.log('sub');
@@ -45,7 +61,15 @@
               if (recordButton.getAttribute('style'))
                 {
                   console.log("message recorded")
-                  publish($('#resultsText').val(),'languagetest/clientout/text/' + document.querySelector('#client1_language').value + '/' + clientId ,2, "client1")
+                  // var watson_channel = 'iot-2/type/MQTTDevice/id/965d11de/evt/ '+  "msgin" + '/fmt/json'
+                  var j = JSON.stringify({
+                    'd': {
+                      'language': document.querySelector('#client1_language').value,
+                      'message': $('#resultsText').val()
+                    }
+                  });
+                  // publish($('#resultsText').val(),'languagetest/clientout/text/' + document.querySelector('#client1_language').value + '/' + clientId ,2, "client1")
+                  publish(j, 'iot-2/type/MQTTDevice/id/965d11de/evt/ '+  "msgout" + '/fmt/json' , 2, "client1")
                 }
             };
     }
@@ -259,7 +283,8 @@
         <div id="client1_div">
         <textarea readonly id="client1_messages" style="border:solid 1px black;" dir="auto"></textarea>
         <form><input type="text" id="client1_message"></form>
-        <button onclick="console.log(document.querySelector('#client1_message').value) ;  publish(document.querySelector('#client1_message').value,'languagetest/clientout/text/' + document.querySelector('#client1_language').value + '/' + clients['client1']._getClientId() ,2 , 'client1');">Submit</button>
+        <button onclick="publish(JSON.stringify({'d': { 'language': document.querySelector('#client1_language').value, 'message': document.querySelector('#client1_message').value }}), 'iot-2/type/MQTTDevice/id/965d11de/evt/msgout/fmt/json', 2, 'a:agf5n9:client1')">Submit</button>
+        <!-- 'languagetest/clientout/text/' + document.querySelector('#client1_language').value + '/' + clients['client1']._getClientId(), -->
         <select id="client1_language" selected="english" onchange="refreshConnection('client1', oldvalue)" onfocus="this.oldvalue = this.value;">
           <option value="en">English</option>
           <option value="fr">French</option>

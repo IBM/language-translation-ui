@@ -4,7 +4,7 @@ var mqtt_host = 'agf5n9.messaging.internetofthings.ibmcloud.com'
 var mqtt_port = 443
 var useTLS = true // true ssl
 
-// MacbookPro:~ kalonji$ mqtt_sub -i 'a:agf5n9:foo' -u 'a-agf5n9-ysppbltpx0' -P '9W1x8syMb-AOku(H_3' -h 'agf5n9.messaging.internetofthings.ibmcloud.com' -p 443 -C wss -t 'iot-2/type/MQTTDevice/id/965d11de/evt/flight/fmt/json'
+// mqtt_sub -i 'a:agf5n9:foo' -u 'a-agf5n9-ysppbltpx0' -P '9W1x8syMb-AOku(H_3' -h 'agf5n9.messaging.internetofthings.ibmcloud.com' -p 443 -C wss -t 'iot-2/type/MQTTDevice/id/965d11de/evt/flight/fmt/json'
 // var useTLS = false // true ssl
 
 var cleansession = true;
@@ -63,7 +63,8 @@ function addClient(clientName, language) {
       clients[clientName].onMessageArrived = function (message) {
          //Do something with the push message you received
          // $('#messages').append('<span>' + message.payloadString + '</span><br/>');
-         document.getElementById(`${clientName}_messages`).value += message.payloadString + '\n'
+        //  document.getElementById(`${clientName}_messages`).value += message.payloadString + '\n'
+        document.getElementById(`${clientName}_messages`).value += message.payloadString + '\n'
       };
 
       clients[clientName].onConnectionLost = function (responseObject) {
@@ -216,9 +217,14 @@ function refreshConnection (clientName, oldLang) {
 var publish = function (payload, topic, qos, clientName) {
      //Send your message (also possible to serialize it as JSON or protobuf or just use a string, no limitations)
      var message = new Messaging.Message(payload);
+     console.log("payload")
+     console.log(payload)
+     console.log("message")
+     console.log(message)
+
      message.destinationName = topic;
      message.qos = qos;
      console.log("clientName")
      console.log(clientName)
-     clients[clientName].send(message);
+     clients[clientName].send(payload);
 }
