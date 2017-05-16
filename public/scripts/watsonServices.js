@@ -66,9 +66,11 @@ MyBlobBuilder.prototype.getBlob = function() {
 
 // flow
 // onLoad
-function onOpen(evt) {
-   console.log("connection opened")
+function onOpen(evt, messageObj) {
+   console.log("websocket connection opened")
+   console.log( "transcribing " + messageObj )
    websocket.send(messageObj)
+
   //  var message = {"text": "Hello world.", "accept": "*/*"};
   //  websocket.send(JSON.stringify(message));
 }
@@ -81,7 +83,9 @@ function onClose(evt) {
    audio.load()
    audio.play();
    console.log("src: " + audio.src)
-   audio.addEventListener('ended', function(){console.log("audio finished playing") ; audio.src = "" ; console.log("src: " + audio.src) });
+   audio.addEventListener('ended', function(){console.log("audio finished playing")
+   audio.src = ""
+   console.log("src: " + audio.src) })
    //  audio.children('source').prop('src', '');
    //  audio.remove().length = 0;
    //  myBlobBuilder = null ;
@@ -97,6 +101,7 @@ function onError(evt) {
 
 function onMessage(evt) {
    console.log("message received")
+   console.log(evt.data)
    console.log(typeof evt.data)
    // taken from http://stackoverflow.com/questions/15970729/appending-blob-data
    var MyBlobBuilder = function() {
@@ -185,12 +190,11 @@ function initWs(client) {
   websocket.onerror = function(evt) { onError(evt) };
 }
 
-var websocket, messageObj, token
+var websocket, token
+// var messageObj
 
 var audio = document.getElementById('playResults');
 
-// request initial tts token
-// publish("request", 'tokens/tts/req', 2, 'tokens'); // TODO, should request a new token every hour
 // clients['tokens'] = new Messaging.Client(mqtt_host, mqtt_port, "myclientid_" + parseInt(Math.random() * 100, 10));
 
 clients['tokens'].onMessageArrived = function (message) {
@@ -205,33 +209,126 @@ clients['tokens'].onMessageArrived = function (message) {
 //
 
 // TODO, onMessageArrived function should be overridden every time audio button is clicked
+// TODO, make a generic function here
+var debugMessage, debugClient
 clients['client1'].onMessageArrived = function (message) {
   //audio and text
   //Do something with the push message you received
-  document.getElementById("client1_messages").value += message.payloadString + '\n'
-  // var messageObj = `"{\"text\": \"${message.payloadString.split(':')[1]}\", \"accept\": \"audio/wav\"}"`;
-  messageObj = JSON.stringify({"text": `"${message.payloadString.split(':')[1]}"`, "accept": "audio/wav"});
-  // this should be done for client that
-  var MyBlobBuilder = function() {
-    this.parts = [];
+  console.log("client message received")
+  console.log(message._getPayloadString())
+  debugMessage = message
+  var msgObj = JSON.parse(message.payloadString).d
+  // console.log(msgObj)
+  // console.log("language: " + msgObj.language)
+  // console.log("message: " + msgObj.payload)
+  // document.getElementById("client1_messages").value += message.payloadString + '\n'
+
+  // console.log("selecting clients " + msgObj.language + '_client')
+  // console.log("clients " + document.getElementsByClassName( msgObj.language + '_client' ))
+
+  // append incoming message text to clients with same language
+  var langClients = document.getElementsByClassName( msgObj.language + '_client' )
+  console.log("langClients")
+  console.log(langClients)
+  for (var i = 0; i < langClients.length; i++) {
+  // for (client in Array(document.getElementsByClassName( msgObj.language + '_client' ))) {
+    console.log("client value")
+    console.log(langClients.item(i).value)
+    debugClient = langClients.item(i)
+    console.log(debugClient)
+    // langClients.item(i).value += msgObj.payload + '\n'
+    // langClients.item(i).value += <div> msgObj.payload </div>
+    // $("#client1_messages").append("<span><div style='margin-left: 18px;margin-top: 5px'>foo</div></span>")
+    $('#' + langClients.item(i).id).append("<div class='speech-bubble' align='left' style='margin-left: 18px;margin-top: 5px'>" + msgObj.payload + "</div>")
   }
 
-  MyBlobBuilder.prototype.append = function(part) {
-    this.parts.push(part);
-    this.blob = undefined; // Invalidate the blob
-  };
+  // determine if any clients subscribed to language have the "audioEnabled" class
+  audioClients = document.getElementsByClassName('audioEnabled')[0] // TODO fix hack
+  if ( (audioClients) && ( msgObj.language == document.getElementById(audioClients.id.split('_')[0] + '_language').value) )
+  {
 
-  MyBlobBuilder.prototype.getBlob = function() {
-    if (!this.blob) {
-      this.blob = new Blob(this.parts, { type: "audio/wav" });
+    var messageObj = JSON.stringify({"text": `${msgObj.payload}`, "accept": "audio/wav"});
+    console.log("transcribing " + msgObj.payload)
+    console.log(messageObj)
+    // return
+    var MyBlobBuilder = function() {
+      this.parts = [];
     }
-    return this.blob;
-  };
-  myBlobBuilder = new MyBlobBuilder();
-  initWs('client1')
+
+    MyBlobBuilder.prototype.append = function(part) {
+      this.parts.push(part);
+      this.blob = undefined; // Invalidate the blob
+    };
+
+    MyBlobBuilder.prototype.getBlob = function() {
+      if (!this.blob) {
+        this.blob = new Blob(this.parts, { type: "audio/wav" });
+      }
+      return this.blob;
+    };
+    myBlobBuilder = new MyBlobBuilder();
+    wsURI = "wss://stream.watsonplatform.net/text-to-speech/api/v1/synthesize?voice="
+      + voices[msgObj.language]
+      + "&watson-token="
+      + watsonTextToSpeechToken;
+    websocket = new WebSocket(wsURI);
+    websocket.onopen = function(evt) { onOpen(evt, messageObj) };
+    websocket.onclose = function(evt) { onClose(evt) };
+    websocket.onmessage = function(evt) { onMessage(evt) };
+    websocket.onerror = function(evt) { onError(evt) };
+
+  }
+  // if ( 'audioEnabled' in document.getElementsByClassName( msgObj.language + '_audio' ).classList ) {
+  //
+  // }
+
+
+  // if ${lang}_audio.classList includes 'audioEnabled'
+  // return
+  // this should be done for client that
+  // initWs('client1')
+
+  // each client's speaker icon should have a class dictacting whether they are on or off
+  // class should also
+
+  // if any client boxes are
+  /*
+  audioToggle = document.getElementById(msgObj.client + "_audio")
+  // if document.getElementById(msgObj.lang + "_audio")
+  if (msgObj.client.audioEnabled) {
+    console.log("transcribing " + msgObj.payload)
+    var messageObj = JSON.stringify({"text": `"${msgObj.payload}"`, "accept": "audio/wav"});
+    var MyBlobBuilder = function() {
+      this.parts = [];
+    }
+
+    MyBlobBuilder.prototype.append = function(part) {
+      this.parts.push(part);
+      this.blob = undefined; // Invalidate the blob
+    };
+
+    MyBlobBuilder.prototype.getBlob = function() {
+      if (!this.blob) {
+        this.blob = new Blob(this.parts, { type: "audio/wav" });
+      }
+      return this.blob;
+    };
+    myBlobBuilder = new MyBlobBuilder();
+    wsURI = "wss://stream.watsonplatform.net/text-to-speech/api/v1/synthesize?voice="
+      + voices[document.getElementById('client1' + "_language").value]
+      + "&watson-token="
+      + watsonTextToSpeechToken;
+    websocket = new WebSocket(wsURI);
+    websocket.onopen = function(evt) { onOpen(evt) };
+    websocket.onclose = function(evt) { onClose(evt) };
+    websocket.onmessage = function(evt) { onMessage(evt) };
+    websocket.onerror = function(evt) { onError(evt) };*/
+  // }
+
   // var promise = new Promise(function(resolve, reject) {
   //   // do a thing, possibly async, then…
 };
+var audioToggle
   //   if (websocket.readyState == 1) {
   //     resolve("Stuff worked!");
   //   }

@@ -398,6 +398,27 @@ table.kws_occurrences {
   display:none;
 }
 
+.speech-bubble {
+	/*position: relative;*/
+	background: #00aabb;
+	border-radius: .4em;
+}
+
+.speech-bubble:after {
+	content: '';
+	position: absolute;
+	bottom: 0;
+	left: 50%;
+	width: 0;
+	height: 0;
+	border: 4px solid transparent;
+	border-top-color: #00aabb;
+	border-bottom: 0;
+	border-left: 0;
+	margin-left: -2px;
+	margin-bottom: -4px;
+}
+
 #btnLoadKWS {
   padding-left:1em;
   width:12em;
@@ -421,13 +442,14 @@ table.kws_occurrences {
 
 // added for mqtt
 .textAreaColumn{
+    margin: auto;
     width:100%;
 }
 .textAreaColumn div{
-    float:left;
-    width:25%;
-    border:1px solid red;
+    margin: auto;
+    /*border:1px solid blue;*/
     padding:10px;
+    border-radius: 25px;
     box-sizing: border-box;
 }
 

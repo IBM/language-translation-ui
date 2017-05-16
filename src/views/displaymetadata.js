@@ -864,7 +864,8 @@ exports.showResult = function(msg, baseString, model) {
         text = text.trim() + '. ';
       }
       baseString += text;
-      $('#resultsText').val(baseString);
+      // $('#resultsText').val(baseString);
+      $('#client1_message').val(baseString);
     }
     else {
       if (japanese) {

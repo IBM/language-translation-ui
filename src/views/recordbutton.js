@@ -56,8 +56,9 @@ exports.initRecordButton = function(ctx) {
             running = false;
             localStorage.setItem('currentlyDisplaying', 'false');
           } else {
-            recordButton.css('background-color', '#d74108');
-            recordButton.find('img').attr('src', 'images/stop.svg');
+            // recordButton.css('background-color', '#d74108');
+            // recordButton.find('img').attr('src', 'images/stop.svg');
+            recordButton.attr('src', 'images/stop-red.svg');
             console.log('starting mic');
             mic.record();
             running = true;
@@ -66,7 +67,7 @@ exports.initRecordButton = function(ctx) {
       } else {
         console.log('Stopping microphone, sending stop action message');
         recordButton.removeAttr('style');
-        recordButton.find('img').attr('src', 'images/microphone.svg');
+        recordButton.attr('src', 'images/microphone_hover.svg');
         $.publish('hardsocketstop');
         mic.stop();
         running = false;

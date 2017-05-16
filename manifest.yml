@@ -4,9 +4,11 @@ declared-services:
     label: speech_to_text
     plan: standard
 applications:
-- name: kal-mqtt
+- name: translation-mqtt
   path: .
+  timeout: 180
   command: npm start
+  #health-check-type: none
   memory: 512M
   services:
     - "Speech To Text-lg"

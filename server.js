@@ -10,8 +10,9 @@ var pem = require('pem');
 
 // Deployment tracking
 require('cf-deployment-tracker-client').track();
-
-var port = process.env.VCAP_APP_PORT || 5000;
+console.log("PROCESS ENV")
+console.log(process.env)
+var port = process.env.VCAP_APP_PORT || 8080;
 app.set('port', (process.env.PORT || port));
 
 var key = fs.readFileSync('public/ca.key').toString();
