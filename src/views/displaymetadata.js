@@ -864,8 +864,23 @@ exports.showResult = function(msg, baseString, model) {
         text = text.trim() + '. ';
       }
       baseString += text;
-      // $('#resultsText').val(baseString);
+      // TODO, make generic for all clients, wipe textbox and send once x num of characters have been transcribed, or after 3 seconds have gone by without further transcription
       $('#client1_message').val(baseString);
+      // if ($('#resultsText').val().length > 0)
+      //   {
+      //     console.log("message recorded")
+      //     // var watson_channel = 'iot-2/type/MQTTDevice/id/965d11de/evt/ '+  "msgin" + '/fmt/json'
+      //     var j = {
+      //         'd': {
+      //           'language': document.querySelector('#client1_language').value,
+      //           'message': $('#resultsText').val(),
+      //           'client': "client1" // TODO
+      //       }
+      //     };
+      //     // publish($('#resultsText').val(),'languagetest/clientout/text/' + document.querySelector('#client1_language').value + '/' + clientId ,2, "client1")
+      //     publish(j, 'iot-2/type/MQTTDevice/id/965d11de/evt/'+  "msgout" + '/fmt/json' , 2, "client1")
+      //     $('#resultsText').val('')
+      //   }
     }
     else {
       if (japanese) {
@@ -873,7 +888,14 @@ exports.showResult = function(msg, baseString, model) {
       } else {
           text = text.charAt(0).toUpperCase() + text.substring(1);
       }
-      $('#resultsText').val(baseString + text);
+      $('#client1_message').val(baseString + text);
+      // $('#resultsText').val(baseString + text);
+      // TODO, add this to test continuous transcription
+      // function () {
+      console.log(recordButton)
+      // if (recordButton.getAttribute('style'))
+
+      // }
     }
   }
   updateTextScroll();

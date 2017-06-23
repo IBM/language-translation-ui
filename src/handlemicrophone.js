@@ -48,6 +48,7 @@ exports.handleMicrophone = function(token, model, mic, callback) {
     'action': 'start',
     'content-type': 'audio/l16;rate=16000',
     'interim_results': true,
+    'speaker_labels': true,
     'continuous': true,
     'word_confidence': true,
     'timestamps': true,

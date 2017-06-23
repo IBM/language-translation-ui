@@ -47,7 +47,7 @@ var wsURI
 //   + token;
 var messages = "";
 var audioStream = [];
-
+var audioToggle
 var MyBlobBuilder = function() {
   this.parts = [];
 }
@@ -70,7 +70,6 @@ function onOpen(evt, messageObj) {
    console.log("websocket connection opened")
    console.log( "transcribing " + messageObj )
    websocket.send(messageObj)
-
   //  var message = {"text": "Hello world.", "accept": "*/*"};
   //  websocket.send(JSON.stringify(message));
 }
@@ -200,13 +199,27 @@ var audio = document.getElementById('playResults');
 clients['tokens'].onMessageArrived = function (message) {
   console.log("new token incoming")
   console.log("payload: " + message.payloadString)
-  watsonTextToSpeechToken = message.payloadString ;
+  if (watsonTextToSpeechToken == undefined) {
+    console.log("tts token being set")
+    watsonTextToSpeechToken = message.payloadString ;
+  }
+}
+
+clients['serverLogs'].onMessageArrived = function (message) {
+  console.log(message)
+  console.log("log received: " +  message._getPayloadString())
+  document.querySelectorAll('[id^="client"][id$="messages"]').forEach(
+    function(e){
+      // console.log(e)
+      $('#' + e.id).append(`<div><p height=1px style='color: #BCD7C6 ; float: right ;  text-align:right; margin-top: 0.5px; font-size:12px ; margin-bottom: 0.5px' >${message._getPayloadString().replace(/['"]+/g, '')}</p></div>`)
+      // e.value += message._getPayloadString() + '\n'
+    }
+  )
 }
 
 // TODO, client1 doesn't unsubscribe when changing language
 
 // all audio icons have an identical class, unique id
-//
 
 // TODO, onMessageArrived function should be overridden every time audio button is clicked
 // TODO, make a generic function here
@@ -232,14 +245,14 @@ clients['client1'].onMessageArrived = function (message) {
   console.log(langClients)
   for (var i = 0; i < langClients.length; i++) {
   // for (client in Array(document.getElementsByClassName( msgObj.language + '_client' ))) {
-    console.log("client value")
-    console.log(langClients.item(i).value)
-    debugClient = langClients.item(i)
-    console.log(debugClient)
     // langClients.item(i).value += msgObj.payload + '\n'
     // langClients.item(i).value += <div> msgObj.payload </div>
     // $("#client1_messages").append("<span><div style='margin-left: 18px;margin-top: 5px'>foo</div></span>")
-    $('#' + langClients.item(i).id).append("<div class='speech-bubble' align='left' style='margin-left: 18px;margin-top: 5px'>" + msgObj.payload + "</div>")
+    console.log("msgObj")
+    console.log(msgObj)
+    console.log("appending " + msgObj.language + " message " + msgObj.payload + " to " + langClients.item(i).id )
+    $('#' + langClients.item(i).id).append("<div class='speech-bubble' align='left' ;  style='margin-left: 18px;margin-top: 5px'>" + (msgObj.client.split(':')[2] || msgObj.client) + ": " + msgObj.payload + "</div>")
+    // $('#' + langClients.item(i).id).animate({scrollTop: $('#' + langClients.item(i).id).prop("scrollHeight")}, 500);
   }
 
   // determine if any clients subscribed to language have the "audioEnabled" class
@@ -328,7 +341,6 @@ clients['client1'].onMessageArrived = function (message) {
   // var promise = new Promise(function(resolve, reject) {
   //   // do a thing, possibly async, then…
 };
-var audioToggle
   //   if (websocket.readyState == 1) {
   //     resolve("Stuff worked!");
   //   }

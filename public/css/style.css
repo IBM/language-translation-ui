@@ -24,6 +24,10 @@
   padding: 0;
 }
 
+::-webkit-scrollbar {
+display: none;
+}
+
 .nav-inverse-color {
   padding: 5px 0;
   text-align: center;
@@ -400,24 +404,87 @@ table.kws_occurrences {
 
 .speech-bubble {
 	/*position: relative;*/
-	background: #00aabb;
+	background: #91e0db;
 	border-radius: .4em;
 }
 
 .speech-bubble:after {
 	content: '';
-	position: absolute;
+	/*position: absolute;*/
 	bottom: 0;
-	left: 50%;
-	width: 0;
+	/*left: 50%;*/
+  float: left;
+	width: 50;
 	height: 0;
 	border: 4px solid transparent;
-	border-top-color: #00aabb;
+	border-top-color: #91e0db;
 	border-bottom: 0;
 	border-left: 0;
-	margin-left: -2px;
-	margin-bottom: -4px;
+	/*margin-left: -2px;*/
+	/*margin-bottom: -4px;*/
 }
+
+
+/* TODO, setup tooltip */
+
+.textboxinput {
+  display: flex;
+}
+.textboxinput > div {
+  flex: 1; /*grow*/
+}
+
+textarea:focus, input:focus{
+    outline: none;
+}
+
+/* Tooltip container */
+.tooltip {
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
+}
+
+/* Tooltip text */
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 120px;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    padding: 5px 0;
+    border-radius: 6px;
+
+    /* Position the tooltip text */
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -60px;
+
+    /* Fade in tooltip */
+    opacity: 0;
+    transition: opacity 1s;
+}
+
+/* Tooltip arrow */
+.tooltip .tooltiptext::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #555 transparent transparent transparent;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+}
+
 
 #btnLoadKWS {
   padding-left:1em;
@@ -442,8 +509,10 @@ table.kws_occurrences {
 
 // added for mqtt
 .textAreaColumn{
+    display: flex;
     margin: auto;
-    width:100%;
+    width:200px;
+    border:1px solid black;
 }
 .textAreaColumn div{
     margin: auto;
@@ -451,16 +520,20 @@ table.kws_occurrences {
     padding:10px;
     border-radius: 25px;
     box-sizing: border-box;
+    flex-grow: 1;
 }
 
-.textAreaColumn div span{
-    display:block;
+.textAreaColumn div div{
+    /*display:block;*/
+    /*position: absolute;
+    bottom: 0;*/
+
 }
 
-.textAreaColumn div textarea{
+/*.textAreaColumn div textarea{
     box-sizing: border-box;
     width:100%
-}
+}*/
 
 .circleBase {
     border-radius: 50%;
