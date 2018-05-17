@@ -9,7 +9,6 @@ var pem = require('pem');
 
 
 // Deployment tracking
-require('cf-deployment-tracker-client').track();
 console.log("PROCESS ENV")
 console.log(process.env)
 var port = process.env.VCAP_APP_PORT || 8080;
