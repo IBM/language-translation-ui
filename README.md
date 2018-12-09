@@ -130,6 +130,6 @@ To do that, add `?debug=true` in the URL.
 
 [service_url]: http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/speech-to-text.html
 [cloud_foundry]: https://github.com/cloudfoundry/cli
-[getting_started]: http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/doc/getting_started/
+[getting_started]: https://cloud.ibm.com/docs/services/watson/index.html#about
 [sign_up]: https://console.ng.bluemix.net/registration/
 [browserify]: http://browserify.org/
